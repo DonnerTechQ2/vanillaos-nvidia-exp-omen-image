@@ -1,0 +1,15 @@
+{
+    "mode": "curve",
+    "curve": [
+        [40, 20],
+        [50, 25],
+        [60, 30],
+        [70, 40],
+        [80, 50],
+        [90, 70],
+        [100, 100]
+    ],
+    "curve_interpolation": "smooth",
+    "watchdog_interval": 60,
+    "ma_window": 5
+}

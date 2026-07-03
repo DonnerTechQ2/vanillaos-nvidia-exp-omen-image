@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=Omen Fan Control
+Comment=Configure fan curves for HP Omen/Victus laptops
+Exec=pkexec /usr/bin/omen_gui
+Icon=/opt/omen-fan-control/assets/logo.png
+Terminal=false
+Type=Application
+Categories=Settings;HardwareSettings;System;
+Keywords=fan;cooling;omen;hp;
