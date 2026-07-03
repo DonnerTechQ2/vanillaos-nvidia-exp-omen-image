@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import sys
 import os
 import signal
@@ -248,7 +249,6 @@ class MainWindow(QMainWindow):
         self.init_home_page()
         self.init_fan_control_page()
         self.init_calibration_page()
-        self.init_driver_page()
         self.init_options_page()
         self.init_about_page()
         
@@ -344,7 +344,7 @@ class MainWindow(QMainWindow):
                     self.controller.config["enable_experimental"] = True
                     self.controller.config["thermal_profile"] = "omen"
                     self.controller.save_config()
-                    QMessageBox.information(self, "Enabled", "Experimental support enabled.\nPlease go to 'Driver Management' to install/update the driver patch.")
+                    QMessageBox.information(self, "Enabled", "Experimental support enabled.")
                     
                     # Force update options page if it exists
                     if hasattr(self, 'exp_check'):
@@ -481,7 +481,6 @@ class MainWindow(QMainWindow):
         menu_items = [
             ("Fan Control", self.show_fan_control),
             ("Calibration", self.show_calibration),
-            ("Driver Management", self.show_driver),
             ("Options", self.show_options),
             ("About", self.show_about),
         ]
@@ -687,57 +686,7 @@ class MainWindow(QMainWindow):
         
         self.stack.addWidget(page)
 
-    def init_driver_page(self):
-        page = QWidget()
-        layout = QVBoxLayout(page)
-        
-        lbl = QLabel("Install drivers to enable functionality.")
-        lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        lbl.setStyleSheet("font-size: 16px; margin-top: 10px;")
-        layout.addWidget(lbl, alignment=Qt.AlignmentFlag.AlignCenter)
-        
-        center_widget = QWidget()
-        c_layout = QVBoxLayout(center_widget)
-        
-        c_layout.addSpacing(15)
-        
-        temp_btn = QPushButton("Install Patch (Temporary)")
-        temp_btn.setFixedWidth(320)
-        temp_btn.clicked.connect(lambda: self.run_driver_task("temp"))
-        c_layout.addWidget(temp_btn, alignment=Qt.AlignmentFlag.AlignCenter)
-        
-        lbl_temp = QLabel("Use for testing. Resets on reboot.")
-        lbl_temp.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        c_layout.addWidget(lbl_temp)
-        
-        c_layout.addSpacing(25)
-        
-        perm_btn = QPushButton("Install Patch (Permanent)")
-        perm_btn.setFixedWidth(320)
-        perm_btn.clicked.connect(lambda: self.run_driver_task("perm"))
-        c_layout.addWidget(perm_btn, alignment=Qt.AlignmentFlag.AlignCenter)
-        
-        lbl_perm = QLabel("Patches and installs kernel module. Persists after reboot.")
-        lbl_perm.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        c_layout.addWidget(lbl_perm)
-        
-        c_layout.addSpacing(25)
-        
-        restore_btn = QPushButton("Uninstall / Restore Original Driver")
-        restore_btn.setFixedWidth(320)
-        restore_btn.setStyleSheet("background-color: #555; color: white;")
-        restore_btn.clicked.connect(lambda: self.run_driver_task("restore"))
-        c_layout.addWidget(restore_btn, alignment=Qt.AlignmentFlag.AlignCenter)
-        
-        lbl_restore = QLabel("Restores .bak files and reloads original driver.")
-        lbl_restore.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        c_layout.addWidget(lbl_restore)
-        
-        layout.addStretch()
-        layout.addWidget(center_widget)
-        layout.addStretch()
-        
-        self.stack.addWidget(page)
+
 
     def init_options_page(self):
         page = QWidget()
@@ -987,9 +936,9 @@ class MainWindow(QMainWindow):
 
     def show_fan_control(self): self.show_page(self.fan_page, "Fan Control")
     def show_calibration(self): self.show_page(self.stack.widget(2), "Calibration")
-    def show_driver(self): self.show_page(self.stack.widget(3), "Driver Management")
-    def show_options(self): self.show_page(self.stack.widget(4), "Options")
-    def show_about(self): self.show_page(self.stack.widget(5), "About")
+
+    def show_options(self): self.show_page(self.stack.widget(3), "Options")
+    def show_about(self): self.show_page(self.stack.widget(4), "About")
 
     # Core Logic
     def update_status(self, temp_override=None):
@@ -1014,17 +963,17 @@ class MainWindow(QMainWindow):
         if not self.controller.pwm1_path or not self.controller.pwm1_path.exists():
             self.controller._find_paths()
             
-        if self.controller.pwm1_path and self.controller.pwm1_path.exists():
-            if "Needs Driver Installation" in self.status_label.text() or "Checking..." in self.status_label.text():
-                 self.status_label.setText("Ready")
-                 self.status_label.setStyleSheet("color: #888; padding: 5px;")
+        has_driver = self.controller.pwm1_path and self.controller.pwm1_path.exists()
+        if has_driver:
+            if "Driver Not Loaded" in self.status_label.text() or "Checking..." in self.status_label.text():
+                self.status_label.setText("Ready")
+                self.status_label.setStyleSheet("color: #44ff44;")
         else:
-            self.status_label.setText("Needs Driver Installation")
-            self.status_label.setStyleSheet("color: #d63333; font-weight: bold; padding: 5px;")
+            self.status_label.setText("Driver Not Loaded")
+            self.status_label.setStyleSheet("color: #ff4444;")
 
     def on_status_click(self, event):
-        if "Needs Driver Installation" in self.status_label.text():
-            self.show_driver()
+        pass
         
     def on_mode_change(self, text):
         self.manual_widget.setVisible(text == "Manual")
@@ -1044,8 +993,8 @@ class MainWindow(QMainWindow):
             
             if not has_driver:
                 QMessageBox.warning(self, "Driver Required", 
-                    f"To use {mode.title()} mode, you must install the kernel driver patch.\n"
-                    "Go to 'Driver Management' to install it.")
+                    f"To use {mode.title()} mode, the kernel driver must be active.\n"
+                    "It seems it failed to load.")
                 return
 
         # Always update and save config first so service can see it
