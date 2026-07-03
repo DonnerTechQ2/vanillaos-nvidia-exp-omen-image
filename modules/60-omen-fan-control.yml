@@ -1,0 +1,20 @@
+name: omen-fan-control
+type: shell
+commands:
+- apt-mark hold python3-click python3-pyqt6 dkms linux-headers-amd64
+
+modules:
+- name: install-deps
+  type: apt
+  sources:
+    - packages:
+      - dkms
+      - linux-headers-amd64
+      - python3-click
+      - python3-pyqt6
+- name: install-omen-driver
+  type: shell
+  commands:
+    - dkms add -m hp-wmi-omen -v 1.0
+    - KVER=$(ls -1 /lib/modules | sort -V | tail -n 1) && dkms autoinstall -k $KVER
+    - systemctl enable omen-fan-control.service

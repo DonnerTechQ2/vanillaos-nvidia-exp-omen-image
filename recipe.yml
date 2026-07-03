@@ -1,5 +1,5 @@
-name: Vanilla Desktop Nvidia Experimental
-id: nvidia-exp
+name: Vanilla Desktop Nvidia Experimental Omen
+id: nvidia-exp-omen
 vibversion: 1.1.0
 
 stages:
@@ -8,7 +8,7 @@ stages:
   addincludes: true
   singlelayer: false
   labels:
-    maintainer: Vanilla OS Contributors
+    maintainer: DonnerTech
   args:
     DEBIAN_FRONTEND: noninteractive
   runs:
@@ -34,6 +34,7 @@ stages:
     type: includes
     includes:
       - modules/50-nvidia-driver-install.yml
+      - modules/60-omen-fan-control.yml
 
   - name: extra-utilities
     type: apt
