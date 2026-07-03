@@ -1,7 +1,7 @@
 [Desktop Entry]
 Name=Omen Fan Control
 Comment=Configure fan curves for HP Omen/Victus laptops
-Exec=pkexec /usr/bin/omen_gui
+Exec=sh -c "pkexec env DISPLAY=$DISPLAY XAUTHORITY=$XAUTHORITY WAYLAND_DISPLAY=$WAYLAND_DISPLAY XDG_RUNTIME_DIR=/run/user/$(id -u) /usr/bin/omen_gui"
 Icon=/opt/omen-fan-control/assets/logo.png
 Terminal=false
 Type=Application
