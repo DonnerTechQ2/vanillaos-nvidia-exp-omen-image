@@ -303,9 +303,13 @@ class FanController:
 
     def set_fan_mode(self, mode):
         """Sets fan mode: 'max', 'auto', or 'manual'."""
+        current_mode = self.read_sys_file(self.pwm1_enable_path)
+        
         if mode == 'max':
+            if current_mode == '0': return
             self.write_sys_file(self.pwm1_enable_path, 0)
         elif mode == 'auto':
+            if current_mode == '2': return
             self.write_sys_file(self.pwm1_enable_path, 2)
 
     def set_fan_pwm(self, value):
